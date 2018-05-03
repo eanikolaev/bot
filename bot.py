@@ -29,7 +29,8 @@ class BotHandler:
         if len(get_result) > 0:
             last_update = get_result[-1]
         else:
-            last_update = get_result[len(get_result)]
+            last_update = None
+            # last_update = get_result[len(get_result)]
 
         return last_update
 
@@ -80,15 +81,16 @@ def main():
 
         last_update = bot.get_last_update()
 
-        last_update_id = last_update['update_id']
-        last_chat_text = last_update['message']['text']
-        last_chat_id = last_update['message']['chat']['id']
+        if last_update:
+            last_update_id = last_update['update_id']
+            last_chat_text = last_update['message']['text']
+            last_chat_id = last_update['message']['chat']['id']
 
-        rnk = min(calc_rank(last_chat_text), 15)
+            rnk = min(calc_rank(last_chat_text), 15)
 
-        bot.send_message(last_chat_id, results[rnk])
+            bot.send_message(last_chat_id, results[rnk])
 
-        new_offset = last_update_id + 1
+            new_offset = last_update_id + 1
 
 if __name__ == '__main__':
     try:
