@@ -34,9 +34,23 @@ class BotHandler:
         return last_update
 
 
-greet_bot = BotHandler(token)
-greetings = ('здравствуй', 'привет', 'ку', 'здорово')
+bot = BotHandler(token)
 now = datetime.datetime.now()
+
+
+def calc_rank(s):
+    key = u'настя'
+    d_key = {u'н': 1, u'а': 2, u'с': 3, u'т': 4, u'я': 5}
+    d_res = {u'н': 0, u'а': 0, u'с': 0, u'т': 0, u'я': 0}
+    for w in s.lower():
+        if w in key:
+            d_res[w] += 1
+
+    res = 0
+    for k, v in d_res.items():
+        res += abs(v - d_key[k])
+
+    return res
 
 
 def main():
@@ -60,30 +74,19 @@ def main():
     ]
 
     new_offset = None
-    today = now.day
-    hour = now.hour
 
     while True:
-        greet_bot.get_updates(new_offset)
+        bot.get_updates(new_offset)
 
-        last_update = greet_bot.get_last_update()
+        last_update = bot.get_last_update()
 
         last_update_id = last_update['update_id']
         last_chat_text = last_update['message']['text']
         last_chat_id = last_update['message']['chat']['id']
-        last_chat_name = last_update['message']['chat']['first_name']
 
-        if last_chat_text.lower() in greetings and today == now.day and 6 <= hour < 12:
-            greet_bot.send_message(last_chat_id, 'Доброе утро, {}'.format(last_chat_name))
-            today += 1
+        rnk = min(calc_rank(last_chat_text), 15)
 
-        elif last_chat_text.lower() in greetings and today == now.day and 12 <= hour < 17:
-            greet_bot.send_message(last_chat_id, 'Добрый день, {}'.format(last_chat_name))
-            today += 1
-
-        elif last_chat_text.lower() in greetings and today == now.day and 17 <= hour < 23:
-            greet_bot.send_message(last_chat_id, 'Добрый вечер, {}'.format(last_chat_name))
-            today += 1
+        bot.send_message(last_chat_id, results[rnk])
 
         new_offset = last_update_id + 1
 
